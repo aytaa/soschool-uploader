@@ -37,7 +37,7 @@ const upload = multer({
         if (path.extname(file.originalname).toLowerCase() === '.pdf') {
             cb(null, true);
         } else {
-            cb(null, false); // Hata durumunu yönetmek için false dönüyoruz
+            cb(null, false);
         }
     }
 }).single('file');
@@ -49,7 +49,7 @@ app.use(express.urlencoded({extended: true}));
 app.post('/upload', (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
-            return res.status(500).json({
+            return res.status(500).send({
                 status: false,
                 message: 'Failed to upload file', error: err.message,
                 date: moment().format('YYYY-MM-DD HH:mm:ss')
@@ -57,7 +57,7 @@ app.post('/upload', (req, res) => {
         }
 
         if (!req.file) {
-            return res.status(404).json({
+            return res.status(404).send({
                 status: false,
                 message: 'Only .pdf files are allowed!',
                 date: moment().format('YYYY-MM-DD HH:mm:ss')
@@ -70,7 +70,6 @@ app.post('/upload', (req, res) => {
 
             await compressPDF(inputPath, outputPath);
 
-            // Orijinal dosyayı silme (isteğe bağlı)
             fs.unlinkSync(inputPath);
 
             res.status(200).send({
@@ -79,7 +78,12 @@ app.post('/upload', (req, res) => {
                 date: moment().format('YYYY-MM-DD HH:mm:ss')
             });
         } catch (error) {
-            res.status(500).json({message: 'Failed to compress PDF', error: error.message});
+            res.status(500).send({
+                message: 'Failed to compress PDF',
+                error: error.message,
+                status: false,
+                date: moment().format('YYYY-MM-DD HH:mm:ss')
+            });
         }
     });
 });
