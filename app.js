@@ -88,6 +88,45 @@ app.post('/upload', (req, res) => {
     });
 });
 
+// Dosya indirme
+app.get('/download/:filename', (req, res) => {
+    const filePath = path.join(__dirname, 'uploads', req.params.filename);
+    res.download(filePath);
+});
+
+// Dosya listeleme
+app.get('/files', (req, res) => {
+    fs.readdir(path.join(__dirname, 'uploads'), (err, files) => {
+        if (err) {
+            return res.status(500).send({
+                message: 'Failed to list files',
+                status: false,
+                date: moment().format('YYYY-MM-DD HH:mm:ss')
+            });
+        }
+        res.send(files);
+    });
+});
+
+// Dosya silme
+app.delete('/delete/:filename', (req, res) => {
+    const filePath = path.join(__dirname, 'uploads', req.params.filename);
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            return res.status(500).send({
+                message: 'Failed to delete file',
+                status: false,
+                date: moment().format('YYYY-MM-DD HH:mm:ss')
+            });
+        }
+        res.send({
+            message: 'File deleted successfully',
+            status: true,
+            date: moment().format('YYYY-MM-DD HH:mm:ss')
+        });
+    });
+});
+
 // Dosya sıkıştırma
 async function compressPDF(inputPath, outputPath) {
     const pdfDoc = await PDFDocument.load(fs.readFileSync(inputPath));
@@ -96,7 +135,6 @@ async function compressPDF(inputPath, outputPath) {
     fs.writeFileSync(outputPath, compressedPdfBytes);
 }
 
-// Diğer endpointler...
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
