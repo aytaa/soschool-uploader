@@ -5,8 +5,12 @@ const path = require('path');
 const {v4: uuidv4} = require('uuid');
 const {PDFDocument} = require('pdf-lib');
 const moment = require('moment');
+const morgan = require('morgan'); // Morgan'ı dahil edin
 const app = express();
 const PORT = 5000;
+
+// Morgan'ı kullan
+app.use(morgan('combined')); // 'combined' formatını kullanarak gelen istekleri loglar
 
 // 'uploads' klasörünün varlığını kontrol et ve yoksa oluştur
 const uploadDir = path.join(__dirname, 'uploads');
@@ -134,7 +138,6 @@ async function compressPDF(inputPath, outputPath) {
 
     fs.writeFileSync(outputPath, compressedPdfBytes);
 }
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
