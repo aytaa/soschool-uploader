@@ -140,6 +140,23 @@ app.delete('/delete/:filename', (req, res) => {
     });
 });
 
+// PDF görüntüleme
+app.get('/view/:filename', (req, res) => {
+    const filePath = path.join(__dirname, 'uploads', req.params.filename);
+
+    // Dosyanın varlığını kontrol et
+    if (fs.existsSync(filePath)) {
+        res.setHeader('Content-Type', 'application/pdf');
+        fs.createReadStream(filePath).pipe(res);
+    } else {
+        res.status(404).send({
+            message: 'File not found',
+            status: false,
+            date: moment().format('YYYY-MM-DD HH:mm:ss')
+        });
+    }
+});
+
 // Dosya sıkıştırma
 async function compressPDF(inputPath, outputPath) {
     const pdfDoc = await PDFDocument.load(fs.readFileSync(inputPath));
